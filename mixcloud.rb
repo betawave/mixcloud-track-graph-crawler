@@ -2,18 +2,26 @@ require 'net/http'
 require 'json'
 
 class WebJsonApi
-  def apiRequest(url)
+  def initialize(stem)
+    @stem = stem
+  end
+
+  def apiRequest(path)
+    url = URI(@stem + path)
     return JSON.parse(Net::HTTP.get(url))
   end
 end
 
 class Mixcloud < WebJsonApi
-  @@stem = 'http://api.mixcloud.com/'
   @@metadataflag = '?metadata=1'
 
+  def initialize
+    super('http://api.mixcloud.com/')
+  end
+
   def call(path, metadata=false)
-    reqUrl = URI.join(@@stem, path)
-    reqUrl = URI.join(reqUrl, @@metadataflag) if metadata
-    return apiRequest(reqUrl)
+    reqPath = path
+    reqPath += @@metadataflag if metadata
+    return apiRequest(reqPath)
   end
 end
