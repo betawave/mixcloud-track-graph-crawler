@@ -17,6 +17,14 @@ class CloudCast < MixcloudObject
     @sections = tracklist
   end
 
+  def getRating
+    return @rating
+  end
+
+  def getPath
+    return @key[1..-1] # cutting away the leading-'/' as this would violate my convention of no leading-'/'es
+  end
+
   def getPrev(path)
     i = @sections.index path
     raise "Track not present" unless i
