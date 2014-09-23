@@ -11,13 +11,6 @@ class Track < MixcloudObject
     path = @@stem + path
     super(path)
 
-    mixes = @@mixcloud.call(path + @@mixes)
-    mixes = mixes["data"]
-    @mixes = []
-    mixes.each do |mix|
-      @mixes <<  CloudCast.new(mix["user"]["username"]+'/'+mix["slug"]+'/')
-    end
-
     self.buildSubnet
   end
 
@@ -25,11 +18,21 @@ class Track < MixcloudObject
   # These two arrays hold essentally all information need for one node inside the track-graph
   # As I'm still uncertain wether or not my Track graph should be a direct one I'm for the moment holding the diffent dirctions (in and out) in two diffent arrays
   def buildSubnet
+    # Collecting "all" Mixes contaning the track from mixcloud 
+    # creating new CloudCast-Objects for each and storing them for further processing in an array
+    mixesPre = @@mixcloud.call(path + @@mixes)
+    mixesPre = mixesPre["data"]
+    mixes = []
+    mixesPre.each do |mix|
+      mixes <<  CloudCast.new(mix["user"]["username"]+'/'+mix["slug"]+'/')
+    end
+
     path = @key[7..-1]
     @mixfrom = []
     @mixinto = []
 
-    @mixes.each do |m|
+    # destilling all the information I'm interested in out of the Cloudcast-Objects
+    mixes.each do |m|
       begin
         track = {:path => m.getPrev(path),
                  :rating => m.getRating,
