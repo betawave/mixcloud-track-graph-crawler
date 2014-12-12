@@ -1,0 +1,2 @@
+Start 4Store-dev-backend with: 4s-start.sh -n MixcloudTrackGraph -p [PortName]
+To view all available Graphs that can be used after -n tag use: ls /var/lib/4store
