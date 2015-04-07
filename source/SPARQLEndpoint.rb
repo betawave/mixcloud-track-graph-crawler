@@ -8,7 +8,7 @@ require 'net/http'
 module URI
   remove_const :DEFAULT_PARSER
   unreserved = REGEXP::PATTERN::UNRESERVED
-  DEFAULT_PARSER = Parser.new(:UNRESERVED => unreserved + "\{\}")
+  DEFAULT_PARSER = Parser.new(:UNRESERVED => unreserved + "\{\}\<\>")
 end
 
 
@@ -27,13 +27,16 @@ class SPARQLEndpoint
     queryElements = sparql.split(' ')
     
     # selects corret stem depnding on first keyword in the query
-    if(@@updateVerbs.select { |verb|
+    update = @@updateVerbs.select { |verb|
       verb == queryElements[0]
-    }.length() > 0)
+    }.length() > 0
+    query = @@queryVerbs.select { |verb|
+      verb == queryElements[0]
+    }.length() > 0
+
+    if(update)
       protoUri = updateStem
-    elsif(@@queryVerbs.select { |verb|
-      verb == queryElements[0]
-    }.length() > 0)
+    elsif(query)
       protoUri = queryStem
     end
     
@@ -45,7 +48,14 @@ class SPARQLEndpoint
     end
 
     uri = URI.parse(protoUri)
-    return Net::HTTP.get(uri)
+    if(update)
+      http = Net::HTTP.new(uri.host, uri.port)
+      req = Net::HTTP::Post.new(uri.path)
+      http.request(req)
+    elsif(query)
+      return Net::HTTP.get(uri)
+    end
+    
   end
 
   def queryStem
